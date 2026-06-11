@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vocab Master Stable</title>
+<style>
+:root{--bg:#08111f;--card:#101827;--muted:#94a3b8;--text:#f8fafc;--border:rgba(148,163,184,.22);--pri:#38bdf8;--good:#34d399;--bad:#fb7185;--warn:#fbbf24}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,system-ui,sans-serif;color:var(--text);padding:14px;background:radial-gradient(circle at top left,rgba(56,189,248,.25),transparent 35%),linear-gradient(135deg,#020617,#0f172a)}
+.app{max-width:1180px;margin:auto}h1{font-size:clamp(28px,5vw,52px);letter-spacing:-.05em;margin:8px 0}.sub{color:#cbd5e1;line-height:1.6;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px}.card{background:rgba(15,23,42,.82);border:1px solid var(--border);border-radius:24px;padding:18px;box-shadow:0 24px 80px rgba(0,0,0,.35)}
+.controls{display:grid;grid-template-columns:1.3fr 1fr .7fr repeat(4,auto);gap:10px;align-items:end;background:rgba(2,6,23,.45);border:1px solid var(--border);padding:12px;border-radius:20px}.field{display:grid;gap:6px}label{font-size:12px;color:#cbd5e1;text-transform:uppercase;font-weight:bold;letter-spacing:.08em}
+select,button,input{min-height:48px;border-radius:14px;border:1px solid var(--border);background:#0b1220;color:var(--text);font-size:16px;padding:0 14px}select{width:100%}button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:hover{border-color:var(--pri)}.primary{background:linear-gradient(135deg,var(--pri),#a5f3fc);color:#062033;border:0;font-weight:900}.good{background:linear-gradient(135deg,var(--good),#bbf7d0);color:#052e16;border:0;font-weight:900}.warn{background:linear-gradient(135deg,var(--warn),#fde68a);color:#451a03;border:0;font-weight:900}.danger{background:linear-gradient(135deg,var(--bad),#ef4444);color:white;border:0;font-weight:900}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.stat{background:rgba(2,6,23,.55);border:1px solid var(--border);border-radius:18px;padding:14px}.stat span{color:var(--muted);font-size:13px}.stat b{display:block;font-size:30px;margin-top:4px}
+.progress{height:14px;background:#020617;border:1px solid var(--border);border-radius:999px;overflow:hidden;padding:2px}.bar{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--pri),#818cf8,var(--good));transition:.25s}
+.question{margin-top:16px;min-height:360px;border:1px solid var(--border);border-radius:24px;padding:22px;background:linear-gradient(180deg,rgba(2,6,23,.75),rgba(15,23,42,.8))}.q-title{display:inline-block;color:#cbd5e1;font-size:14px;border:1px solid var(--border);border-radius:999px;padding:7px 11px;background:rgba(255,255,255,.06)}.word{font-size:clamp(38px,7vw,72px);font-weight:900;letter-spacing:-.06em;margin:22px 0;background:linear-gradient(135deg,#fff,#bae6fd,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
+.answers{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.answer{white-space:normal;text-align:left;min-height:64px;padding:15px;background:rgba(15,23,42,.95)}.answer.correct{border-color:var(--good);background:rgba(52,211,153,.16)}.answer.wrong{border-color:var(--bad);background:rgba(251,113,133,.16)}
+.pills{display:flex;gap:8px;flex-wrap:wrap;max-height:270px;overflow:auto}.pill{border:1px solid var(--border);border-radius:999px;padding:8px 11px;background:rgba(2,6,23,.58);font-size:13px}.bad{border-color:rgba(251,113,133,.6);color:#fecdd3}.ok{border-color:rgba(52,211,153,.5);color:#bbf7d0}.level-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.result{display:none;margin-top:16px;background:rgba(2,6,23,.5);border:1px solid var(--border);border-radius:18px;padding:15px}.show{display:block}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid var(--border);padding:8px;text-align:left}#debug{display:none;margin-top:12px;color:#fecaca;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);border-radius:12px;padding:10px;white-space:pre-wrap}
+@media(max-width:1000px){.grid{grid-template-columns:1fr}.controls{grid-template-columns:repeat(3,1fr)}.wide{grid-column:span 2}}
+@media(max-width:650px){body{padding:10px}.card{padding:14px;border-radius:20px}.controls{grid-template-columns:1fr 1fr}.wide,.primary,.good{grid-column:1/-1}.stats{grid-template-columns:1fr 1fr}.answers{grid-template-columns:1fr}.question{min-height:310px;padding:16px}}
+@media(max-width:390px){.controls,.stats{grid-template-columns:1fr}.word{font-size:38px}}
+
+.backup-actions{
+  display:grid;
+  gap:10px;
+}
+.ios-file-input{
+  width:100%;
+  min-height:48px;
+  padding:11px 12px;
+  border:1px dashed var(--border);
+  border-radius:14px;
+  background:#0b1220;
+  color:var(--text);
+  font-size:14px;
+}
+.ios-file-input::file-selector-button{
+  border:0;
+  border-radius:10px;
+  padding:9px 12px;
+  margin-right:10px;
+  background:var(--pri);
+  color:#062033;
+  font-weight:800;
+}
+.ios-file-input::-webkit-file-upload-button{
+  border:0;
+  border-radius:10px;
+  padding:9px 12px;
+  margin-right:10px;
+  background:var(--pri);
+  color:#062033;
+  font-weight:800;
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+<h1>Vocab Master Stable</h1>
+<div class="sub">Bản ổn định cho điện thoại + máy tính. Chọn mode rồi bấm <b>Bắt đầu</b>. Trả lời sai mới hiện giải thích, đúng thì chuyển câu nhanh.</div>
+<div class="grid">
+<main class="card">
+<div class="controls">
+<div class="field wide"><label>Chế độ</label><select id="mode"><option value="mixed">Mixed CEFR + IT</option><option value="cefr">CEFR Vocabulary</option><option value="it">IT English</option><option value="weak">Ôn từ yếu</option></select></div>
+<div class="field wide"><label>Level</label><select id="level"><option value="all">A1 → B2</option><option value="A1">A1</option><option value="A2">A2</option><option value="B1">B1</option><option value="B2">B2</option></select></div>
+<div class="field"><label>Số câu</label><select id="count"><option>10</option><option>15</option><option>20</option></select></div>
+<button id="prevBtn" type="button">← Ngày</button><button id="nextBtn" type="button">Ngày →</button><button id="startBtn" class="primary" type="button">Bắt đầu</button><button id="weakBtn" class="good" type="button">Ôn yếu</button>
+</div>
+<div class="stats"><div class="stat"><span>Ngày</span><b id="day">1</b></div><div class="stat"><span>Điểm</span><b id="score">0/0</b></div><div class="stat"><span>Đã học</span><b id="learned">0</b></div><div class="stat"><span>Streak</span><b id="streak">0</b></div></div>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<section id="quizBox" class="question"><div class="q-title">Sẵn sàng. Bấm Bắt đầu để ra câu hỏi.</div></section>
+<div id="resultBox" class="result"></div><div id="backupText" class="result"></div><div id="debug"></div>
+</main>
+<aside class="card">
+<h3>Chọn nhanh CEFR</h3><div class="level-grid"><button data-level="A1" class="levelQuick">A1</button><button data-level="A2" class="levelQuick">A2</button><button data-level="B1" class="levelQuick">B1</button><button data-level="B2" class="levelQuick">B2</button></div>
+<h3 style="margin-top:20px">Từ yếu</h3><div id="weakWords" class="pills"></div>
+<h3 style="margin-top:20px">Backup</h3>
+<div class="backup-actions">
+<button id="exportBtn" class="warn" type="button">Xuất JSON</button>
+<button id="importBtn" type="button">Import JSON</button>
+<input id="importFile" class="ios-file-input" type="file" accept="application/json,.json">
+<button id="resetBtn" class="danger" type="button">Xóa tiến độ</button>
+</div>
+</aside>
+</div>
+</div>
+<script>
+(function(){
+"use strict";
+var RAW = {"cefr": {"A1": [["about", "về/khoảng"], ["address", "địa chỉ"], ["adult", "người lớn"], ["after", "sau"], ["again", "lại"], ["age", "tuổi"], ["air", "không khí"], ["airport", "sân bay"], ["all", "tất cả"], ["always", "luôn luôn"], ["animal", "động vật"], ["answer", "câu trả lời"], ["apple", "quả táo"], ["area", "khu vực"], ["ask", "hỏi"], ["baby", "em bé"], ["back", "quay lại/lưng"], ["bad", "xấu/tệ"], ["bag", "túi"], ["bank", "ngân hàng"], ["bathroom", "phòng tắm"], ["beach", "bãi biển"], ["beautiful", "đẹp"], ["because", "bởi vì"], ["bed", "giường"], ["begin", "bắt đầu"], ["behind", "phía sau"], ["believe", "tin"], ["best", "tốt nhất"], ["between", "giữa"], ["big", "to/lớn"], ["bird", "chim"], ["birthday", "sinh nhật"], ["black", "màu đen"], ["blue", "màu xanh dương"], ["body", "cơ thể"], ["book", "sách"], ["boy", "con trai"], ["bread", "bánh mì"], ["breakfast", "bữa sáng"], ["brother", "anh/em trai"], ["bus", "xe buýt"], ["business", "kinh doanh"], ["busy", "bận"], ["buy", "mua"], ["cake", "bánh"], ["call", "gọi"], ["camera", "máy ảnh"], ["can", "có thể"], ["car", "ô tô"], ["card", "thẻ"], ["cat", "mèo"], ["chair", "ghế"], ["cheap", "rẻ"], ["check", "kiểm tra"], ["child", "đứa trẻ"], ["city", "thành phố"], ["class", "lớp"], ["clean", "sạch"], ["close", "đóng/gần"], ["coffee", "cà phê"], ["cold", "lạnh"], ["come", "đến"], ["company", "công ty"], ["computer", "máy tính"], ["cook", "nấu ăn"], ["correct", "đúng"], ["country", "quốc gia"], ["course", "khóa học"], ["customer", "khách hàng"], ["dad", "bố"], ["day", "ngày"], ["decide", "quyết định"], ["delicious", "ngon"], ["describe", "mô tả"], ["desk", "bàn làm việc"], ["different", "khác nhau"], ["difficult", "khó"], ["dinner", "bữa tối"], ["doctor", "bác sĩ"], ["dog", "chó"]], "A2": [["ability", "khả năng"], ["able", "có thể"], ["abroad", "ở nước ngoài"], ["accept", "chấp nhận"], ["accident", "tai nạn"], ["achieve", "đạt được"], ["active", "năng động"], ["actually", "thực ra"], ["advantage", "lợi thế"], ["advice", "lời khuyên"], ["affect", "ảnh hưởng"], ["already", "đã rồi"], ["although", "mặc dù"], ["amount", "số lượng"], ["app", "ứng dụng"], ["appear", "xuất hiện"], ["apply", "ứng tuyển/áp dụng"], ["arrange", "sắp xếp"], ["assistant", "trợ lý"], ["attend", "tham dự"], ["attention", "sự chú ý"], ["available", "có sẵn"], ["average", "trung bình"], ["avoid", "tránh"], ["background", "nền/tiểu sử"], ["basic", "cơ bản"], ["battery", "pin"], ["belong", "thuộc về"], ["benefit", "lợi ích"], ["biology", "sinh học"], ["borrow", "mượn"], ["boss", "sếp"], ["brain", "não"], ["brave", "dũng cảm"], ["bridge", "cây cầu"], ["bright", "sáng"], ["broken", "bị hỏng"], ["button", "nút"], ["camping", "cắm trại"], ["careful", "cẩn thận"], ["case", "trường hợp"], ["cash", "tiền mặt"], ["cause", "nguyên nhân/gây ra"], ["chance", "cơ hội"], ["character", "nhân vật/ký tự"], ["chat", "trò chuyện"], ["choice", "lựa chọn"], ["clear", "rõ ràng"], ["climate", "khí hậu"], ["cloud", "mây/đám mây"], ["coach", "huấn luyện viên"], ["collect", "thu thập"], ["comfortable", "thoải mái"], ["comment", "bình luận"], ["communicate", "giao tiếp"], ["community", "cộng đồng"], ["compare", "so sánh"], ["complete", "hoàn thành"], ["condition", "điều kiện"], ["connect", "kết nối"], ["continue", "tiếp tục"], ["control", "kiểm soát"], ["create", "tạo ra"], ["culture", "văn hóa"], ["daily", "hằng ngày"], ["deadline", "hạn chót"], ["deliver", "bàn giao"], ["develop", "phát triển"], ["direct", "trực tiếp"], ["download", "tải xuống"], ["education", "giáo dục"], ["effect", "tác động"]], "B1": [["absolutely", "hoàn toàn"], ["academic", "thuộc học thuật"], ["access", "truy cập"], ["account", "tài khoản"], ["achievement", "thành tựu"], ["addition", "sự bổ sung"], ["admire", "ngưỡng mộ"], ["admit", "thừa nhận"], ["advanced", "nâng cao"], ["afford", "có khả năng chi trả"], ["agency", "cơ quan"], ["agenda", "chương trình họp"], ["agreement", "thỏa thuận"], ["aim", "mục tiêu/nhắm tới"], ["allow", "cho phép"], ["alternative", "sự thay thế"], ["ambition", "tham vọng"], ["analysis", "phân tích"], ["announce", "thông báo"], ["anxious", "lo lắng"], ["apologize", "xin lỗi"], ["application", "ứng dụng/đơn"], ["appointment", "cuộc hẹn"], ["appreciate", "trân trọng"], ["approach", "cách tiếp cận"], ["appropriate", "phù hợp"], ["approval", "sự phê duyệt"], ["argument", "cuộc tranh luận/đối số"], ["arrangement", "sự sắp xếp"], ["assessment", "đánh giá"], ["assignment", "nhiệm vụ/bài tập"], ["assist", "hỗ trợ"], ["assume", "giả định"], ["attempt", "nỗ lực"], ["attitude", "thái độ"], ["authority", "thẩm quyền"], ["automatic", "tự động"], ["aware", "nhận thức được"], ["balance", "cân bằng"], ["basis", "cơ sở"], ["behavior", "hành vi"], ["belief", "niềm tin"], ["beyond", "vượt ngoài"], ["block", "chặn/khối"], ["branch", "nhánh"], ["brand", "thương hiệu"], ["brief", "ngắn gọn"], ["budget", "ngân sách"], ["campaign", "chiến dịch"], ["candidate", "ứng viên"], ["capable", "có khả năng"], ["capacity", "năng lực/sức chứa"], ["capture", "nắm bắt/chụp"], ["category", "danh mục"], ["central", "trung tâm"], ["challenge", "thử thách"], ["chapter", "chương"], ["client", "khách hàng"], ["collapse", "sụp đổ/thu gọn"], ["combination", "sự kết hợp"], ["commercial", "thương mại"], ["commitment", "cam kết"], ["comparison", "sự so sánh"], ["complex", "phức tạp"], ["confidence", "sự tự tin"]], "B2": [["abstract", "trừu tượng"], ["accurate", "chính xác"], ["acknowledge", "thừa nhận"], ["adapt", "thích nghi"], ["adequate", "đầy đủ"], ["adjust", "điều chỉnh"], ["administration", "sự quản trị"], ["adopt", "áp dụng/nhận nuôi"], ["advance", "tiến bộ"], ["advocate", "ủng hộ"], ["alter", "thay đổi"], ["anticipate", "dự đoán"], ["anxiety", "sự lo lắng"], ["apparent", "rõ ràng"], ["appeal", "sự hấp dẫn/kêu gọi"], ["applicant", "ứng viên"], ["appoint", "bổ nhiệm"], ["appreciation", "sự trân trọng"], ["arise", "phát sinh"], ["asset", "tài sản"], ["assign", "giao việc"], ["assistance", "sự hỗ trợ"], ["assumption", "giả định"], ["assure", "đảm bảo"], ["attach", "đính kèm"], ["attain", "đạt được"], ["automate", "tự động hóa"], ["barrier", "rào cản"], ["bias", "thiên kiến"], ["capability", "năng lực"], ["cease", "chấm dứt"], ["clarify", "làm rõ"], ["coherent", "mạch lạc"], ["collaborate", "hợp tác"], ["compile", "biên dịch/tổng hợp"], ["comprehensive", "toàn diện"], ["comprise", "bao gồm"], ["concept", "khái niệm"], ["conclude", "kết luận"], ["concrete", "cụ thể"], ["conduct", "tiến hành"], ["consequence", "hậu quả"], ["considerable", "đáng kể"], ["consistent", "nhất quán"], ["constraint", "ràng buộc"], ["construct", "xây dựng"], ["consult", "tham khảo/tư vấn"], ["consume", "tiêu thụ"], ["context", "ngữ cảnh"], ["contract", "hợp đồng"], ["contradict", "mâu thuẫn"], ["contribute", "đóng góp"], ["controversial", "gây tranh cãi"], ["coordinate", "phối hợp"], ["core", "cốt lõi"], ["criterion", "tiêu chí"], ["crucial", "then chốt"], ["define", "định nghĩa"], ["demonstrate", "chứng minh/thể hiện"], ["derive", "suy ra"], ["detect", "phát hiện"], ["dimension", "chiều/kích thước"], ["distinct", "riêng biệt"], ["distinguish", "phân biệt"], ["diverse", "đa dạng"], ["duration", "thời lượng"], ["dynamic", "năng động/động"], ["eliminate", "loại bỏ"], ["emerge", "xuất hiện"], ["enable", "bật/cho phép"], ["enhance", "nâng cao"]]}, "it": [["API", "giao diện lập trình ứng dụng"], ["algorithm", "thuật toán"], ["authentication", "xác thực danh tính"], ["authorization", "phân quyền"], ["backup", "sao lưu"], ["branch", "nhánh"], ["bug", "lỗi"], ["build", "bản build"], ["cache", "bộ nhớ đệm"], ["CI/CD", "tích hợp và triển khai liên tục"], ["cloud", "đám mây"], ["code review", "đánh giá mã"], ["commit", "cam kết mã"], ["component", "thành phần"], ["configuration", "cấu hình"], ["container", "container"], ["database", "cơ sở dữ liệu"], ["debug", "gỡ lỗi"], ["dependency", "phụ thuộc"], ["deploy", "triển khai"], ["Docker", "Docker"], ["endpoint", "điểm cuối API"], ["environment variable", "biến môi trường"], ["error handling", "xử lý lỗi"], ["feature", "tính năng"], ["frontend", "phần giao diện"], ["backend", "phần máy chủ"], ["framework", "khung làm việc"], ["Git", "Git"], ["hotfix", "bản vá khẩn cấp"], ["interface", "giao diện"], ["Jenkins", "Jenkins"], ["latency", "độ trễ"], ["library", "thư viện"], ["log", "nhật ký"], ["merge conflict", "xung đột khi gộp mã"], ["module", "mô-đun"], ["network", "mạng"], ["package", "gói"], ["payload", "dữ liệu gửi kèm"], ["performance", "hiệu năng"], ["pipeline", "đường ống xử lý"], ["pull request", "yêu cầu gộp mã"], ["repository", "kho mã"], ["request", "yêu cầu"], ["response", "phản hồi"], ["responsive design", "thiết kế đáp ứng"], ["route", "tuyến đường"], ["runtime error", "lỗi khi chạy"], ["security", "bảo mật"], ["server", "máy chủ"], ["session", "phiên"], ["source code", "mã nguồn"], ["staging", "môi trường thử nghiệm"], ["state management", "quản lý trạng thái"], ["storage", "lưu trữ"], ["syntax error", "lỗi cú pháp"], ["technical debt", "nợ kỹ thuật"], ["test case", "trường hợp kiểm thử"], ["token", "mã thông báo"], ["unit test", "kiểm thử đơn vị"], ["validation", "xác thực dữ liệu"], ["version control", "quản lý phiên bản"], ["Vue component", "component Vue"], ["watcher", "bộ theo dõi"], ["websocket", "kết nối thời gian thực"]]};
+var CEFR = [];
+Object.keys(RAW.cefr).forEach(function(level){ RAW.cefr[level].forEach(function(pair){ CEFR.push({en:pair[0],vi:pair[1],type:"CEFR",level:level}); }); });
+var IT = RAW.it.map(function(pair){ return {en:pair[0],vi:pair[1],type:"IT",level:"IT"}; });
+var ALL = CEFR.concat(IT);
+var state = loadState();
+var quiz = [], qIndex = 0, score = 0, locked = false;
+
+function el(id){ return document.getElementById(id); }
+function showError(err){ var d=el("debug"); d.style.display="block"; d.textContent = "Lỗi JS: " + (err && err.message ? err.message : String(err)); }
+window.onerror=function(msg,src,line,col,err){ showError(err || msg); };
+function loadState(){ try{ return JSON.parse(localStorage.getItem("vocab_stable") || '{"day":1,"learned":{},"weak":{},"history":[],"lastDate":"","streak":0}'); }catch(e){ return {day:1,learned:{},weak:{},history:[],lastDate:"",streak:0}; } }
+function save(){ localStorage.setItem("vocab_stable", JSON.stringify(state)); renderStats(); renderWeak(); }
+function shuffle(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function pick(arr,n,offset){ var out=[]; if(!arr.length) return out; for(var i=0;i<n;i++) out.push(arr[(offset+i)%arr.length]); return out; }
+function offset(){ return ((state.day||1)-1)*10; }
+function escape(s){ return String(s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); }
+
+function weakPool(){ return Object.keys(state.weak||{}).sort(function(a,b){ return (state.weak[b].wrong||0)-(state.weak[a].wrong||0); }).map(function(en){ return ALL.find(function(x){return x.en===en;}) || {en:en,vi:state.weak[en].vi,type:"Weak",level:"Weak"}; }); }
+function lessonWords(){
+  var mode=el("mode").value, level=el("level").value, total=Number(el("count").value||10);
+  if(mode==="weak") return pick(weakPool(), total, 0);
+  if(mode==="it") return pick(IT,total,offset());
+  var cefrPool = level==="all" ? CEFR : CEFR.filter(function(x){return x.level===level;});
+  if(mode==="cefr") return pick(cefrPool,total,offset());
+  var cefrCount=Math.round(total*0.6); return pick(cefrPool,cefrCount,offset()).concat(pick(IT,total-cefrCount,offset()));
+}
+function makeQuestion(w){ var wrongs=shuffle(ALL.filter(function(x){return x.vi!==w.vi;})).slice(0,3).map(function(x){return x.vi;}); return {word:w,answers:shuffle([w.vi].concat(wrongs))}; }
+
+function startQuiz(){
+  try{
+    var words=lessonWords();
+    if(!words.length){ el("quizBox").innerHTML='<div class="q-title">Chưa có từ yếu. Hãy làm quiz trước.</div>'; return; }
+    quiz=words.map(makeQuestion); qIndex=0; score=0; locked=false; el("resultBox").className="result"; renderTodayWords(); showQuestion();
+  }catch(e){ showError(e); }
+}
+function showQuestion(){
+  var q=quiz[qIndex]; locked=false;
+  el("score").textContent=score+"/"+qIndex; el("bar").style.width=((qIndex/quiz.length)*100)+"%";
+  var html='<div class="q-title">Câu '+(qIndex+1)+'/'+quiz.length+' · '+escape(q.word.type)+' '+escape(q.word.level)+'</div>';
+  html+='<div class="word">'+escape(q.word.en)+'</div><div class="answers">';
+  q.answers.forEach(function(ans,i){ html+='<button type="button" class="answer" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+escape(ans)+'</button>'; });
+  html+='</div>'; el("quizBox").innerHTML=html;
+  Array.prototype.forEach.call(document.querySelectorAll(".answer"),function(btn){ btn.onclick=function(){ choose(Number(btn.getAttribute("data-i")), btn); }; });
+}
+function explainWrong(q, chosen){
+  var box=document.createElement("div");
+  box.className="explain";
+  box.innerHTML =
+    '<b>Sai rồi.</b><br>' +
+    'Bạn chọn: <b>' + escape(chosen) + '</b><br>' +
+    'Đáp án đúng: <span class="ok-text">' + escape(q.word.vi) + '</span><br>' +
+    'Từ: <b>' + escape(q.word.en) + '</b> · ' + escape(q.word.type) + ' ' + escape(q.word.level) +
+    '<div class="tip">Mẹo nhớ: đọc to 3 lần và tự đặt 1 câu ngắn với từ <b>' + escape(q.word.en) + '</b>.</div>';
+  el("quizBox").appendChild(box);
+}
+function choose(answerIndex, btn){
+  if(locked) return; locked=true;
+  var q=quiz[qIndex], ans=q.answers[answerIndex], ok=ans===q.word.vi;
+  Array.prototype.forEach.call(document.querySelectorAll(".answer"),function(b){ var a=q.answers[Number(b.getAttribute("data-i"))]; if(a===q.word.vi) b.classList.add("correct"); });
+  if(!ok) btn.classList.add("wrong");
+  if(ok){ score++; state.learned[q.word.en]=q.word.vi; if(state.weak[q.word.en]) state.weak[q.word.en].right=(state.weak[q.word.en].right||0)+1; }
+  else { state.weak[q.word.en]=state.weak[q.word.en]||{vi:q.word.vi,wrong:0,right:0}; state.weak[q.word.en].wrong++; explainWrong(q, ans); }
+  setTimeout(function(){ qIndex++; if(qIndex>=quiz.length) finish(); else showQuestion(); save(); }, ok ? 650 : 2600);
+}
+function finish(){
+  var pct=Math.round(score/quiz.length*100); updateStreak();
+  state.history.push({date:new Date().toISOString(),day:state.day,mode:el("mode").value,level:el("level").value,score:score,total:quiz.length,pct:pct});
+  el("bar").style.width="100%"; el("score").textContent=score+"/"+quiz.length;
+  el("quizBox").innerHTML='<div class="q-title">Hoàn thành</div><div class="word">'+pct+'%</div><p>'+(pct>=80?'Ngon. Mai tăng nhịp nhẹ.':'Ôn từ yếu rồi làm lại, không có gì căng.')+'</p>';
+  el("resultBox").className="result show"; el("resultBox").innerHTML=historyTable(); save();
+}
+function updateStreak(){ var today=new Date().toISOString().slice(0,10); if(state.lastDate===today)return; var y=new Date(); y.setDate(y.getDate()-1); var yd=y.toISOString().slice(0,10); state.streak=state.lastDate===yd?(state.streak||0)+1:1; state.lastDate=today; }
+function historyTable(){ var rows=(state.history||[]).slice(-8).reverse(); return '<b>Lịch sử gần nhất</b><table><tr><th>Ngày</th><th>Mode</th><th>Điểm</th></tr>'+rows.map(function(r){return '<tr><td>'+r.day+'</td><td>'+escape(r.mode)+' '+escape(r.level)+'</td><td>'+r.score+'/'+r.total+' ('+r.pct+'%)</td></tr>';}).join("")+'</table>'; }
+function renderTodayWords(){ return; }
+function renderWeak(){ var box=el("weakWords"); box.innerHTML=""; var weak=Object.keys(state.weak||{}).sort(function(a,b){return (state.weak[b].wrong||0)-(state.weak[a].wrong||0);}).slice(0,30); if(!weak.length){ box.innerHTML='<span class="pill">Chưa có từ yếu</span>'; return; } weak.forEach(function(en){ var s=document.createElement("span"); s.className="pill bad"; s.textContent=en+" = "+state.weak[en].vi+" · sai "+state.weak[en].wrong; box.appendChild(s); }); }
+function renderStats(){ el("day").textContent=state.day||1; el("learned").textContent=Object.keys(state.learned||{}).length; el("streak").textContent=state.streak||0; }
+function nextDay(){ state.day=Math.min(90,(state.day||1)+1); save(); renderTodayWords(); }
+function prevDay(){ state.day=Math.max(1,(state.day||1)-1); save(); renderTodayWords(); }
+function exportProgress(){
+  var text = JSON.stringify(state,null,2);
+  var box = el("backupText");
+  box.className = "result show";
+  box.innerHTML = '<b>Backup JSON</b><p style="color:#cbd5e1">Nếu iOS không tải file, copy nội dung dưới đây để lưu lại.</p><textarea id="backupArea" style="width:100%;min-height:180px;border-radius:14px;background:#020617;color:#e5e7eb;border:1px solid var(--border);padding:12px">'+escape(text)+'</textarea>';
+  try {
+    var blob=new Blob([text],{type:"application/json"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");
+    a.href=url; a.download="vocab-stable-progress.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  } catch(e) { showError(e); }
+}
+function importProgress(e){ var file=e.target.files[0]; if(!file)return; var r=new FileReader(); r.onload=function(){ try{ state=JSON.parse(r.result); save(); renderTodayWords(); }catch(err){showError(err)} }; r.readAsText(file); }
+function reset(){ if(!confirm("Xóa toàn bộ tiến độ?"))return; state={day:1,learned:{},weak:{},history:[],lastDate:"",streak:0}; save(); renderTodayWords(); el("score").textContent="0/0"; el("bar").style.width="0%"; el("quizBox").innerHTML='<div class="q-title">Đã xóa tiến độ.</div>'; }
+
+document.addEventListener("DOMContentLoaded", function(){
+  el("startBtn").addEventListener("click", startQuiz);
+  el("weakBtn").addEventListener("click", function(){ el("mode").value="weak"; startQuiz(); });
+  el("nextBtn").addEventListener("click", nextDay);
+  el("prevBtn").addEventListener("click", prevDay);
+  el("mode").addEventListener("change", function(){ el("level").disabled = el("mode").value==="it" || el("mode").value==="weak"; renderTodayWords(); });
+  el("level").addEventListener("change", renderTodayWords);
+  el("count").addEventListener("change", renderTodayWords);
+  Array.prototype.forEach.call(document.querySelectorAll(".levelQuick"),function(b){ b.addEventListener("click",function(){ el("mode").value="cefr"; el("level").value=b.getAttribute("data-level"); el("level").disabled=false; renderTodayWords(); }); });
+  el("exportBtn").addEventListener("click", exportProgress);
+  el("importBtn").addEventListener("click", function(){
+    try { el("importFile").click(); } catch(e) { showError(e); }
+  });
+  el("importFile").addEventListener("change", importProgress);
+  el("resetBtn").addEventListener("click", reset);
+  renderStats(); renderWeak(); renderTodayWords();
+});
+})();
+</script>
+</body>
+</html>
